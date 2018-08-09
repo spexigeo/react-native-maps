@@ -346,6 +346,10 @@ NSInteger const AIR_CALLOUT_OPEN_ZINDEX_BASELINE = 999;
     self.layer.zPosition = zIndex;
 }
 
+- (void)isSelected {
+  return isAlwaysSelected || [super isSelected];
+}
+
 - (void)dealloc {
     [self.layer removeObserver:self forKeyPath:@"zPosition"];
 }
