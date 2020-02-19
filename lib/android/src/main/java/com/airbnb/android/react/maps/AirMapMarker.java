@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -81,6 +82,7 @@ public class AirMapMarker extends AirMapFeature {
   private boolean hasCustomMarkerView = false;
   private final AirMapMarkerManager markerManager;
   private String imageUri;
+  private Point markerOffset;
 
   private final DraweeHolder<?> logoHolder;
   private DataSource<CloseableReference<CloseableImage>> dataSource;
@@ -146,6 +148,22 @@ public class AirMapMarker extends AirMapFeature {
     setZIndex(Math.round(options.getZIndex()));
     setAlpha(options.getAlpha());
     iconBitmapDescriptor = options.getIcon();
+  }
+
+  public LatLng getInitialPosition() {
+    return position;
+  }
+
+  public void setInitialPosition(LatLng newPosition) {
+    position = newPosition;
+  }
+
+  public Point getMarkerOffset() {
+    return markerOffset;
+  }
+
+  public void setMarkerOffset(Point newMarkerOffset) {
+    markerOffset = newMarkerOffset;
   }
 
   private GenericDraweeHierarchy createDraweeHierarchy() {

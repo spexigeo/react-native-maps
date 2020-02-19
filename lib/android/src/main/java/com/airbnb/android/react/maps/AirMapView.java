@@ -962,12 +962,39 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     return true;
   }
 
+  /*
+      We need this nonsense because the Google Maps API moves a marker above the user's finger when selected
+      So we need to calculate the offset to update a marker's position
+    */
+  public void calculateOffset(Marker marker, AirMapMarker markerView) {
+    Projection projection = map.getProjection();
+    Point pointBeforeClick = projection.toScreenLocation(markerView.getInitialPosition());
+    Point pointAfterClick = projection.toScreenLocation(marker.getPosition());
+    pointAfterClick.x -= pointBeforeClick.x;
+    pointAfterClick.y -= pointBeforeClick.y;
+    markerView.setMarkerOffset(pointAfterClick);
+  }
+
+  public LatLng offsetMarker(Marker marker, AirMapMarker markerView) {
+    Projection projection = map.getProjection();
+    Point point = projection.toScreenLocation(marker.getPosition());
+    point.x -= markerView.getMarkerOffset().x;
+    point.y -= markerView.getMarkerOffset().y;
+
+    return projection.fromScreenLocation(point);
+
+  }
+
   @Override
   public void onMarkerDragStart(Marker marker) {
     WritableMap event = makeClickEventData(marker.getPosition());
     manager.pushEvent(context, this, "onMarkerDragStart", event);
 
     AirMapMarker markerView = getMarkerMap(marker);
+    // get position offset between marker selected and after selection
+    calculateOffset(marker, markerView);
+    // stop marker from jumping by moving it back to its preselected position
+    marker.setPosition(markerView.getInitialPosition());
     event = makeClickEventData(marker.getPosition());
     manager.pushEvent(context, markerView, "onDragStart", event);
   }
@@ -978,6 +1005,8 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     manager.pushEvent(context, this, "onMarkerDrag", event);
 
     AirMapMarker markerView = getMarkerMap(marker);
+    // offset marker on each drag event based on offset
+    marker.setPosition(offsetMarker(marker, markerView));
     event = makeClickEventData(marker.getPosition());
     manager.pushEvent(context, markerView, "onDrag", event);
   }
@@ -988,6 +1017,10 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     manager.pushEvent(context, this, "onMarkerDragEnd", event);
 
     AirMapMarker markerView = getMarkerMap(marker);
+    // offset marker and update initial position for next drag
+    LatLng lastPosition = offsetMarker(marker, markerView);
+    marker.setPosition(lastPosition);
+    markerView.setInitialPosition(lastPosition);
     event = makeClickEventData(marker.getPosition());
     manager.pushEvent(context, markerView, "onDragEnd", event);
   }
