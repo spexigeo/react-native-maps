@@ -977,7 +977,7 @@ static int kDragCenterContext;
       mapView.hasStartedRendering = YES;
     }
     [mapView beginLoading];
-    [self _emitRegionChangeEvent:mapView continuous:NO];
+    [self _emitRegionChangeEvent:mapView continuous:YES];
 }
 
 - (void)mapViewDidFinishRenderingMap:(AIRMap *)mapView fullyRendered:(BOOL)fullyRendered
